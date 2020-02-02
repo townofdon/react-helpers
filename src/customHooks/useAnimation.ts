@@ -3,7 +3,6 @@ import React from 'react';
 
 import useStateNonRendering from './useStateNonRendering';
 
-
 //  __  __     ______     ______     ______     __   __     __     __    __     ______     ______   __     ______     __   __
 // /\ \/\ \   /\  ___\   /\  ___\   /\  __ \   /\ "-.\ \   /\ \   /\ "-./  \   /\  __ \   /\__  _\ /\ \   /\  __ \   /\ "-.\ \
 // \ \ \_\ \  \ \___  \  \ \  __\   \ \  __ \  \ \ \-.  \  \ \ \  \ \ \-./\ \  \ \  __ \  \/_/\ \/ \ \ \  \ \ \/\ \  \ \ \-.  \
@@ -20,7 +19,6 @@ function round(num, precision: number = 2): number {
   const exp = (10 ** precision);
   return Math.round((parseFloat(num) || 0) * exp) / exp;
 }
-
 
 /**
  * Shamelessly borrowed from https://gist.github.com/gre/1650294
@@ -57,7 +55,6 @@ const easing = {
   easeInOutQuint: function (t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
 }
 
-
 export enum EasingFunction {
   linear,
   easeInQuad,
@@ -80,6 +77,20 @@ interface Params {
   easingFunction?: keyof typeof EasingFunction;
 };
 
+/**
+ * Get the t and inverted t values for animating an element over n duration.
+ *
+ * ## USAGE:
+ *
+ * ```
+ * const [tIn, tOut] = useAnimation({ animationDuration: 2000 });
+ * const style = {
+ *   position: fixed,
+ *   // start animation from top of screen and move downwards
+ *   top: 0 * tIn + 100 * tOut,
+ * };
+ * ```
+ */
 export default function useAnimation({
   animationDuration = 1000,
   isLoading,
@@ -147,5 +158,5 @@ export default function useAnimation({
 
   const t = easing[easingFunction](arcPct);
 
-  return [t];
+  return [t, Math.abs(t - 1)];
 }
