@@ -97,7 +97,7 @@ export default function useAnimation({
   easingFunction = 'easeInOutQuint',
 }: Params = {}) {
   const [getAnimationTimeStart, setAnimationTimeStart] = useStateNonRendering(Date.now());
-  const [arcPct, setArcPct] = React.useState(0);
+  const [pct, setPct] = React.useState(0);
 
   //
   // Initial Animation
@@ -105,13 +105,13 @@ export default function useAnimation({
   React.useEffect(() => {
     if (isLoading) return;
     const t = setTimeout(() => {
-      if (arcPct < 1) {
+      if (pct < 1) {
         const timeCurrent = Date.now();
-        let arcPctNew = round((timeCurrent - getAnimationTimeStart()) / animationDuration, 3);
-        if (arcPctNew === arcPct) arcPctNew += 0.001;
-        if (arcPctNew < 0.001) arcPctNew = 0.001;
-        if (arcPctNew > 1) arcPctNew = 1;
-        setArcPct(arcPctNew);
+        let pctNew = round((timeCurrent - getAnimationTimeStart()) / animationDuration, 3);
+        if (pctNew === pct) pctNew += 0.001;
+        if (pctNew < 0.001) pctNew = 0.001;
+        if (pctNew > 1) pctNew = 1;
+        setPct(pctNew);
       }
     }, 16);
 
@@ -119,13 +119,13 @@ export default function useAnimation({
     return () => {
       clearTimeout(t);
     }
-  }, [arcPct, isLoading, animationDuration]);
+  }, [pct, isLoading, animationDuration]);
 
   const reTriggerAnimation = () => {
     setAnimationTimeStart(Date.now());
     if (!isLoading) return;
     // val 0.01 allows redrawing chart to avoid flicker
-    setArcPct(0.01);
+    setPct(0.01);
   };
 
   //
@@ -156,7 +156,7 @@ export default function useAnimation({
     };
   }, []);
 
-  const t = easing[easingFunction](arcPct);
+  const t = easing[easingFunction](pct);
 
   return [t, Math.abs(t - 1)];
 }
