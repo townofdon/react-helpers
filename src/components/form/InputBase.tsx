@@ -2,7 +2,7 @@
 import React from 'react';
 import { RenderFnc } from '../../_types';
 
-export interface InputBaseProps {
+export type InputBaseProps = {
   name: string;
   label?: string;
   error?: string;

@@ -1,3 +1,3 @@
-import { ReactElement } from "react";
+import React from "react";
 
-export type RenderFnc<Props> = (Props) => ReactElement;
+export type RenderFnc<Props> = (Props: Props) => React.ReactElement;
