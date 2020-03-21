@@ -1,47 +1,88 @@
 
 import React from 'react';
 import { RenderFnc } from '../../_types';
+import { Field, ErrorMessage } from 'formik';
+
+interface LabelProps {
+  label?: string;
+}
+
+interface ErrorProps {
+  name: string;
+}
 
 export type InputBaseProps = {
   name: string;
   label?: string;
-  error?: string;
+  innerRef?: React.Ref<React.ReactElement>;
 }
 
+interface InputRefProps {
+  labelJsx?: React.ReactElement;
+  inputJsx?: React.ReactElement;
+  errorJsx?: React.ReactElement;
+};
+
 export type InputProps = InputBaseProps & {
-  render?: RenderFnc<InputBaseProps>,
+  render?: RenderFnc<InputBaseProps & InputRefProps>;
+  renderLabel?: RenderFnc<LabelProps>;
+  renderInput?: RenderFnc<InputBaseProps>;
+  renderError?: RenderFnc<ErrorProps>;
 };
 
 const InputBase: React.FC<InputProps> = ({
   name,
   label,
-  error,
   render,
+  renderLabel,
+  renderInput,
+  renderError,
+  innerRef,
 }) => {
 
-  if (render) return render({
-    name,
-    label,
-    error,
-  });
-
-  return (
-    <div>
-      {!!label && (
+  const labelJsx = renderLabel
+    ? renderLabel({ label })
+    : (
+      !!label ? (
         <p>
           <label>
             {label}
           </label>
         </p>
-      )}
-      <input
+      ) : null
+    );
+
+  const inputJsx = renderInput
+    ? renderInput({ name, label, innerRef })
+    : (
+      <Field
+        name={name}
+        innerRef={innerRef}
+      />
+    );
+  
+  const errorJsx = renderError
+    ? renderError({ name })
+    : (
+      <ErrorMessage
         name={name}
       />
-      {!!error && (
-        <p style={{ color: 'red' }}>
-          {error}
-        </p>
-      )}
+    );
+
+  if (render) return render({
+    name,
+    label,
+    innerRef,
+    labelJsx,
+    inputJsx,
+    errorJsx,
+  });
+
+  return (
+    <div>
+      {labelJsx}
+      {inputJsx}
+      {errorJsx}
     </div>
   );
 };
