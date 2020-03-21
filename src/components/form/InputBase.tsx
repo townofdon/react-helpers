@@ -1,17 +1,16 @@
 
 import React from 'react';
 import { RenderFnc } from '../../_types';
-import { Field, ErrorMessage } from 'formik';
 
 interface LabelProps {
   label?: string;
 }
 
 interface ErrorProps {
-  name: string;
+  error?: string;
 }
 
-export type InputBaseProps = {
+export type InputBaseProps = ErrorProps & ErrorProps & {
   name: string;
   label?: string;
   innerRef?: React.Ref<React.ReactElement>;
@@ -33,6 +32,7 @@ export type InputProps = InputBaseProps & {
 const InputBase: React.FC<InputProps> = ({
   name,
   label,
+  error,
   render,
   renderLabel,
   renderInput,
@@ -55,18 +55,19 @@ const InputBase: React.FC<InputProps> = ({
   const inputJsx = renderInput
     ? renderInput({ name, label, innerRef })
     : (
-      <Field
-        name={name}
-        innerRef={innerRef}
-      />
+      <p>
+        <input name={name} />
+      </p>
     );
   
   const errorJsx = renderError
-    ? renderError({ name })
+    ? renderError({ error })
     : (
-      <ErrorMessage
-        name={name}
-      />
+      !!error ? (
+        <p style={{ color: "red" }}>
+          {error}
+        </p>
+      ) : null
     );
 
   if (render) return render({

@@ -4,7 +4,7 @@ import InputBase, { InputBaseProps, InputProps } from '../../components/form/Inp
 import { RenderFnc } from '../../_types';
 
 const InputBaseFactory = (render: RenderFnc<InputBaseProps>): React.FC<InputProps> => {
-  return (props) => InputBase({ render, ...props });
+  return (props) => <InputBase render={render} {...props } />;
 };
 
 export default InputBaseFactory;
