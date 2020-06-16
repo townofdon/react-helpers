@@ -1,4 +1,12 @@
 
+/**
+ * INPUT MASK
+ *
+ * https://jsperf.com/inputmask-comparison
+ *
+ * Heavily modelled after imask.js; this aims to be a lean, minimalistic, functional, implementation-agnostic library
+ */
+
 const regexNonAlphaNumeric = /[\(\)\[\]\-\.\s]/gi;
 const regexNotNumeric = /(?![0-9.])/gi;
 const regexNumeric = /[0-9]/i;
@@ -12,8 +20,8 @@ const DEFAULT_MASK_DELIMITER = "-";
 const DEFAULT_MASK_VALUE = "";
 const DEFAULT_DECIMAL_CHAR = ".";
 
-
 type Mask = any;
+
 interface InputMaskConstructorOptions {
   mask: Mask;
   delimiter?: string;
