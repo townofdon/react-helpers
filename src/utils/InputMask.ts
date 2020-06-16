@@ -7,15 +7,19 @@ const regexAlpha = /[a-zA-Z]/i;
 const CHAR_DIGIT = "0";
 const CHAR_ALPHA = "a";
 const CHAR_ANY = "*";
-const DEFAULT_MASK_TYPE = "_NORMAL_";
+const DEFAULT_MASK = "";
 const DEFAULT_MASK_DELIMITER = "-";
+const DEFAULT_MASK_VALUE = "";
+const DEFAULT_DECIMAL_CHAR = ".";
 
+
+type Mask = any;
 interface InputMaskConstructorOptions {
-  type?: any;
-  pattern?: string;
+  mask: Mask;
   delimiter?: string;
   maxLength?: number;
   guide?: boolean;
+  decimalChar?: string;
 }
 
 interface PatternPart {
@@ -24,47 +28,42 @@ interface PatternPart {
 }
 
 class InputMask {
-  _pattern: string = "";
-  _patternParts: any[] = [];
+  _mask: Mask = DEFAULT_MASK;
+  _maskParts: any[] = [];
   _maxLength: number = Infinity;
   _guide: boolean = false;
   _delimiter: string = DEFAULT_MASK_DELIMITER;
-  _type: any = DEFAULT_MASK_TYPE;
-  value: string = "";
-  unmaskedValue: any = "";
+  _decimalChar: string = DEFAULT_DECIMAL_CHAR;
+  value: string = DEFAULT_MASK_VALUE;
+  unmaskedValue: any = DEFAULT_MASK_VALUE;
 
   constructor(
     options: InputMaskConstructorOptions = {
-      pattern: "",
+      mask: DEFAULT_MASK_VALUE,
     }
   ) {
-    this._type = options.type;
     this._checkOptions(options);
-    this._pattern = options.pattern;
-    this._maxLength = options.maxLength;
-    this._guide = options.guide;
+    this._mask = options.mask || DEFAULT_MASK;
+    this._maxLength = options.maxLength || Infinity;
+    this._guide = options.guide || false;
     this._delimiter = options.delimiter || this._getDefaultDelimiter();
-    this._patternParts = InputMask._preparePatternParts(options.pattern);
+    this._decimalChar = options.decimalChar || DEFAULT_DECIMAL_CHAR;
+    this._maskParts = InputMask._preparePatternParts(options.mask);
     return this;
   }
 
   _checkOptions(options: InputMaskConstructorOptions) {
-    if (this._type === DEFAULT_MASK_TYPE) {
-      if (!options.pattern) {
-        throw new Error(
-          "constructor `options.pattern` param required and cannot be empty"
-        );
-      }
-      if (typeof options.pattern !== "string") {
-        throw new Error("constructor `options.pattern` param must be a string");
-      }
+    if (!options.mask) {
+      throw new Error(
+        "constructor `options.mask` param required and cannot be empty"
+      );
     }
   }
 
-  static _preparePatternParts(pattern: string): PatternPart[] {
-    if (!pattern) return [];
-    if (typeof pattern !== "string" && typeof pattern !== "number") return [];
-    const _pattern = (pattern || "").toString();
+  static _preparePatternParts(mask: Mask): PatternPart[] {
+    if (!mask) return [];
+    if (typeof mask !== "string" && typeof mask !== "number") return [];
+    const _mask = (mask || "").toString();
     let parts: PatternPart[] = [];
     let buffer = "";
     let optionalFlag = false;
@@ -74,8 +73,8 @@ class InputMask {
         optional,
       });
     };
-    for (let i = 0; i < _pattern.length; i += 1) {
-      const char = _pattern[i];
+    for (let i = 0; i < _mask.length; i += 1) {
+      const char = _mask[i];
       if (char === "[") {
         optionalFlag = true;
         continue;
@@ -97,18 +96,18 @@ class InputMask {
 
   _isTypeNumber() {
     return false ||
-      this._type === "Number" ||
-      this._type === "number" ||
-      this._type === Number ||
-      this._type instanceof Number;
+      this._mask === "Number" ||
+      this._mask === "number" ||
+      this._mask === Number ||
+      this._mask instanceof Number;
   }
 
   _isTypeDate() {
     return false ||
-      this._type === "Date" ||
-      this._type === "date" ||
-      this._type === Date ||
-      this._type instanceof Date;
+      this._mask === "Date" ||
+      this._mask === "date" ||
+      this._mask === Date ||
+      this._mask instanceof Date;
   }
 
   _getDefaultDelimiter() {
@@ -146,7 +145,8 @@ class InputMask {
       composed = numPartWhole[i] + composed;
       placeValue++;
     }
-    return composed + (numPartDecimal ? `.${numPartDecimal}` : "")
+    const suffix = numPartDecimal ? `${this._decimalChar}${numPartDecimal}` : "";
+    return composed + suffix;
   }
 
   mask(val) {
@@ -160,11 +160,11 @@ class InputMask {
       composed += char;
       cursor++;
     };
-    for (let i = 0; i < this._patternParts.length; i++) {
+    for (let i = 0; i < this._maskParts.length; i++) {
       if (cursor >= this._maxLength) break;
 
       const char = _val[cursor];
-      const part = this._patternParts[i];
+      const part = this._maskParts[i];
       const compareVal = part.value
         .trim()
         .toLowerCase()
