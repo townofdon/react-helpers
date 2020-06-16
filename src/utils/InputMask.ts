@@ -5,6 +5,36 @@
  * https://jsperf.com/inputmask-comparison
  *
  * Heavily modelled after imask.js; this aims to be a lean, minimalistic, functional, implementation-agnostic library
+ *
+ * **USAGE**:
+ *
+ * ```
+ * // phone number mask
+ * const inputMaskPhone = new InputMask({ mask: '[1 ](000) 000-0000' });
+ * const valFormatted = inputMaskPhone.mask('5409999999') // "(540) 999-9999";
+ * const valRaw = inputMaskPhone.unmask('(540) 999-9999') // "5409999999";
+ *
+ * // credit card number mask
+ * const inputMaskCC = new InputMask({ mask: '0000 0000 0000 0000' });
+ * const valFormatted = inputMaskCC.mask('1234123412341234') // "1234 1234 1234 1234";
+ * const valRaw = inputMaskCC.unmask('1234 1234 1234 1234') // "1234123412341234";
+ *
+ * // number mask
+ * const inputMaskNumber = new InputMask({ mask: Number });
+ * const valFormatted = inputMaskNumber.mask('12345.67') // "12,345.67";
+ * const valRaw = inputMaskNumber.unmask('12,345.67') // "12345.67";
+ *
+ * // date mask
+ * const inputMaskDate = new InputMask({ mask: Date });
+ * const valFormatted = inputMaskDate.mask('20201231') // "2020-12-31";
+ * const valRaw = inputMaskDate.unmask('2020-12-31') // "20201231";
+ *
+ * // alternate mask usage
+ * const inputMaskGeneric = new InputMask({ mask: "0000 0000" });
+ * inputMaskGeneric.process("12345678");
+ * inputMaskGeneric.value; // "1234 5678"
+ * inputMaskGeneric.unmaskedValue; // "12345678"
+ * ```
  */
 
 const regexNonAlphaNumeric = /[|()[\]/\\\-+_.\s]/gi;
