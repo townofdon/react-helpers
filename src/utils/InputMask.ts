@@ -7,8 +7,9 @@
  * Heavily modelled after imask.js; this aims to be a lean, minimalistic, functional, implementation-agnostic library
  */
 
-const regexNonAlphaNumeric = /[\(\)\[\]\-\.\s]/gi;
-const regexNotNumeric = /(?![0-9.])/gi;
+const regexNonAlphaNumeric = /[|()[\]/\\\-+_.\s]/gi;
+const regexNotNumeric = /[|()[\]/\\\-+_\sa-zA-Z]/gi;
+const regexDateDelimiter = /[|()[\]/\\\-+_.\sa-zA-Z]/gi;
 const regexNumeric = /[0-9]/i;
 const regexAlpha = /[a-zA-Z]/i;
 
@@ -19,6 +20,13 @@ const DEFAULT_MASK = "";
 const DEFAULT_MASK_DELIMITER = "-";
 const DEFAULT_MASK_VALUE = "";
 const DEFAULT_DECIMAL_CHAR = ".";
+const DEFAULT_DATE_PATTERN = "YYYY-mm-dd";
+
+const padWithZeros = (str, numFill = 0) => {
+  return (str || "")
+    .toString()
+    .padStart(numFill, "0");
+};
 
 type Mask = any;
 
@@ -28,6 +36,7 @@ interface InputMaskConstructorOptions {
   maxLength?: number;
   guide?: boolean;
   decimalChar?: string;
+  datePattern?: string;
 }
 
 interface PatternPart {
@@ -42,6 +51,7 @@ class InputMask {
   _guide: boolean = false;
   _delimiter: string = DEFAULT_MASK_DELIMITER;
   _decimalChar: string = DEFAULT_DECIMAL_CHAR;
+  _datePattern: string = DEFAULT_DATE_PATTERN;
   value: string = DEFAULT_MASK_VALUE;
   unmaskedValue: any = DEFAULT_MASK_VALUE;
 
@@ -56,6 +66,7 @@ class InputMask {
     this._guide = options.guide || false;
     this._delimiter = options.delimiter || this._getDefaultDelimiter();
     this._decimalChar = options.decimalChar || DEFAULT_DECIMAL_CHAR;
+    this._datePattern = options.datePattern || DEFAULT_DATE_PATTERN;
     this._maskParts = InputMask._preparePatternParts(options.mask);
     return this;
   }
@@ -129,9 +140,15 @@ class InputMask {
   }
 
   _sanitizeInput(val): string {
-    if (this._isTypeNumber()) {
+    const formatVal = (regexCharsToStrip: RegExp) => {
       const _val = (!val && val !== 0) ? "" : val;
-      return _val.toString().replace(regexNotNumeric, "");
+      return _val.toString().replace(regexCharsToStrip, "");
+    };
+    if (this._isTypeNumber()) {
+      return formatVal(regexNotNumeric);
+    }
+    if (this._isTypeDate()) {
+      return formatVal(regexDateDelimiter);
     }
     return (val || "").toString().replace(regexNonAlphaNumeric, "");
   }
@@ -157,8 +174,100 @@ class InputMask {
     return composed + suffix;
   }
 
+  _maskDate(val) {
+    const _val: string = this._sanitizeInput(val);
+    const datePatternParts = this._datePattern
+      .split(regexNonAlphaNumeric)
+      .filter(v => !!v)
+      .map(v => v.toLowerCase());
+
+    let composed = "";
+    let cursor = 0;
+    let currentDay: number = 0;
+    let currentMonth: number = 0;
+    let currentYear: number = 0;
+
+    const setTimeFromInput = (currentTimeUnit: "d" | "m" | "y", partial) => {
+      const intPartial = parseInt(partial, 10);
+      switch (currentTimeUnit) {
+        case "d":
+          currentDay = intPartial;
+          break;
+        case "m":
+          currentMonth = intPartial;
+          break;
+        case "y":
+          currentYear = intPartial;
+          break;
+        default:
+          break;
+      }
+    };
+
+    const captureChars = (currentTimeUnit: "d" | "m" | "y", numChars = 4, max = '9999') => {
+      if (cursor !== 0) {
+        composed += this._delimiter;
+      }
+      let partial = _val.substring(cursor, cursor + numChars);
+      if (partial.length === numChars) {
+        const isUnderMin = parseInt(partial, 10) === 0;
+        const isOverMax = parseInt(partial, 10) > parseInt(max, 10);
+        if (isUnderMin) {
+          partial = "01".padStart(numChars, "0");
+        } else if (isOverMax) {
+          partial = max;
+        }
+        setTimeFromInput(currentTimeUnit, partial);
+      }
+      composed += partial
+      cursor += partial.length;
+    };
+
+    for (let i = 0; i < datePatternParts.length; i++) {
+      const part = datePatternParts[i];
+      if (part.includes('y')) {
+        captureChars('y', 4, '9999');
+        continue;
+      }
+      if (part.includes('m')) {
+        captureChars('m', 2, '12');
+        continue;
+      }
+      if (part.includes('d')) {
+        captureChars('d', 2, '31');
+        continue;
+      }
+    }
+
+    if (currentDay && currentMonth && currentYear) {
+      const d = new Date();
+      d.setFullYear(currentYear);
+      d.setMonth(currentMonth - 1);
+      d.setDate(currentDay);
+      const dateParts = [];
+      for (let i = 0; i < datePatternParts.length; i++) {
+        const part = datePatternParts[i];
+        if (part.includes('y')) {
+          dateParts.push(padWithZeros(d.getFullYear(), 4));
+          continue;
+        }
+        if (part.includes('m')) {
+          dateParts.push(padWithZeros(d.getMonth() + 1, 2));
+          continue;
+        }
+        if (part.includes('d')) {
+          dateParts.push(padWithZeros(d.getDate(), 2));
+          continue;
+        }
+      }
+      composed = dateParts.join(this._delimiter);
+    }
+    return composed;
+  }
+
   mask(val) {
     if (this._isTypeNumber()) return this._maskNumber(val);
+    if (this._isTypeDate()) return this._maskDate(val);
 
     const _val: string = this._sanitizeInput(val);
     const maxCursor = _val.length;

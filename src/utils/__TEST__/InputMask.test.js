@@ -81,3 +81,37 @@ test('input mask works for number type', () => {
   expect(i2.mask('150000.00')).toEqual('150.000,00');
   expect(i2.mask('1500000.00')).toEqual('1.500.000,00');
 });
+
+test('input mask works for date type', () => {
+  const i1 = new InputMask({ mask: Date, datePattern: 'YYYY-mm-dd', delimiter: '-' });
+  expect(i1.mask('20010101')).toEqual('2001-01-01');
+  expect(i1.mask('20010131')).toEqual('2001-01-31');
+  expect(i1.mask('20011231')).toEqual('2001-12-31');
+  expect(i1.mask('20201231')).toEqual('2020-12-31');
+  expect(i1.mask('2020-12-31')).toEqual('2020-12-31');
+  expect(i1.mask('2020/12/31')).toEqual('2020-12-31');
+  expect(i1.mask('2020.12.31')).toEqual('2020-12-31');
+
+  // handle mm-yy format
+  const i2 = new InputMask({ mask: Date, datePattern: 'mm-yy' });
+  expect(i2.mask('021990')).toEqual('02/1990');
+  expect(i2.mask('02-1990')).toEqual('02/1990');
+
+  // handle mm-dd-yyyy format
+  const i3 = new InputMask({ mask: Date, datePattern: 'mm-dd-yyyy' });
+  expect(i3.mask('01012010')).toEqual('01/01/2010');
+  expect(i3.mask('12312020')).toEqual('12/31/2020');
+  expect(i3.mask('12-31-2020')).toEqual('12/31/2020');
+
+  // handle out-of-bound numbers
+  const i4 = new InputMask({ mask: Date, datePattern: 'mm-dd-yyyy' });
+  expect(i4.mask('00000000')).toEqual('01/01/0001');
+  expect(i4.mask('00330000')).toEqual('01/31/0001');
+  expect(i4.mask('99000000')).toEqual('12/01/0001');
+  expect(i4.mask('00009999')).toEqual('01/01/9999');
+
+  // handle date bleeding into next month (the logic here is based on Date.prototype.setDate internal functionality and doesn't reflect a particular use-case need)
+  expect(i4.mask('02292010')).toEqual('03/01/2010');
+  expect(i4.mask('02302010')).toEqual('03/02/2010');
+  expect(i4.mask('02312010')).toEqual('03/03/2010');
+});
