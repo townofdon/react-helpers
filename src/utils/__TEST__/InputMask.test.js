@@ -46,3 +46,25 @@ test('input masks work correctly for credit cards', () => {
   expect(inputMaskCC.mask('1234123412341234')).toEqual('1234 1234 1234 1234');
   expect(inputMaskCC.mask('12341234')).toEqual('1234 1234');
 });
+
+test('input mask constructed with correct default delimeter', () => {
+  const i1 = new InputMask({ pattern: '0000 0000 0000 0000', type: Number });
+  expect(i1._delimiter).toEqual(',');
+  const i2 = new InputMask({ pattern: '0000 0000 0000 0000', type: Date });
+  expect(i2._delimiter).toEqual('/');
+});
+
+test('input mask works for number type', () => {
+  const i1 = new InputMask({ type: Number });
+  expect(i1.mask()).toEqual('');
+  expect(i1.mask(0)).toEqual('0');
+  expect(i1.mask(1)).toEqual('1');
+  expect(i1.mask(15)).toEqual('15');
+  expect(i1.mask(150)).toEqual('150');
+  expect(i1.mask(1500)).toEqual('1,500');
+  expect(i1.mask(15000)).toEqual('15,000');
+  expect(i1.mask(15000.1)).toEqual('15,000.1');
+  expect(i1.mask(15000.11)).toEqual('15,000.11');
+  expect(i1.mask('15000.0')).toEqual('15,000.0');
+  expect(i1.mask('15000.00')).toEqual('15,000.00');
+});
