@@ -1,7 +1,7 @@
 
 import Home from './pages/Home';
-import InputExample from './examples/InputExample';
-import InputExample2 from './examples/InputExample2';
+import InputExample from './pages/InputExample';
+import InputExample2 from './pages/InputExample2';
 
 export default [
   {
