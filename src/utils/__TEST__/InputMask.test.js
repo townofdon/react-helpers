@@ -84,15 +84,17 @@ test('input mask works for number type', () => {
   expect(i1.mask(15000)).toEqual('15,000');
   expect(i1.mask(15000.1)).toEqual('15,000.1');
   expect(i1.mask(15000.11)).toEqual('15,000.11');
+  expect(i1.mask('.')).toEqual('0.');
+  expect(i1.mask('15000.')).toEqual('15,000.');
   expect(i1.mask('15000.0')).toEqual('15,000.0');
   expect(i1.mask('15000.00')).toEqual('15,000.00');
   expect(i1.mask('15000000.00')).toEqual('15,000,000.00');
 
   // handle different number formats
   const i2 = new InputMask({ mask: Number, delimiter: '.', decimalChar: ',' });
-  expect(i2.mask('15000.00')).toEqual('15.000,00');
-  expect(i2.mask('150000.00')).toEqual('150.000,00');
-  expect(i2.mask('1500000.00')).toEqual('1.500.000,00');
+  expect(i2.mask('15000,00')).toEqual('15.000,00');
+  expect(i2.mask('150000,00')).toEqual('150.000,00');
+  expect(i2.mask('1500000,00')).toEqual('1.500.000,00');
 
   // handle currency prefix
   const i3 = new InputMask({ mask: Number, prefix: '$' });
@@ -105,6 +107,38 @@ test('input mask works for number type', () => {
   expect(i3.mask('111111')).toEqual('$111,111');
   expect(i3.mask('1111111')).toEqual('$1,111,111');
   expect(i3.mask('15000000.00')).toEqual('$15,000,000.00');
+
+  // handle decimal precision
+  const i4 = new InputMask({ mask: Number, prefix: '$', decimalPrecision: 2 });
+  expect(i4.mask('')).toEqual('');
+  expect(i4.mask('.')).toEqual('$0.');
+  expect(i4.mask('0')).toEqual('$0');
+  expect(i4.mask('0.')).toEqual('$0.');
+  expect(i4.mask('0.0')).toEqual('$0.0');
+  expect(i4.mask('0.00')).toEqual('$0.00');
+  expect(i4.mask('0.000')).toEqual('$0.00');
+  expect(i4.mask('0.1')).toEqual('$0.1');
+  expect(i4.mask('0.11')).toEqual('$0.11');
+  expect(i4.mask('0.111')).toEqual('$0.11');
+  expect(i4.mask('0.114')).toEqual('$0.11');
+  expect(i4.mask('0.115')).toEqual('$0.12');
+  expect(i4.mask('0.119')).toEqual('$0.12');
+  expect(i4.mask('0.121')).toEqual('$0.12');
+  expect(i4.mask('0.125')).toEqual('$0.13');
+  expect(i4.mask('11.125')).toEqual('$11.13');
+  expect(i4.mask('1111111.999')).toEqual('$1,111,111.99');
+  expect(i4.mask('1111111.9999')).toEqual('$1,111,111.99');
+  expect(i4.mask(1111111.9999)).toEqual('$1,111,111.99');
+  const i5 = new InputMask({ mask: Number, decimalPrecision: 4 });
+  expect(i5.mask(3.14159265359)).toEqual('3.1416');
+
+  // handle different number format AND decimal precision
+  const i6 = new InputMask({ mask: Number, prefix: '£', delimiter: '.', decimalChar: ',', decimalPrecision: 2 });
+  expect(i6.mask('')).toEqual('');
+  expect(i6.mask('.')).toEqual('');
+  expect(i6.mask(',')).toEqual('£0,');
+  expect(i6.mask('12345')).toEqual('£12.345');
+  expect(i6.mask('12345,678')).toEqual('£12.345,68');
 });
 
 test('input mask works for date type', () => {

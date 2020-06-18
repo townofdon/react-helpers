@@ -37,7 +37,7 @@
  * ```
  */
 
-const regexNonAlphaNumeric = /[|()[\]/\\\-+_.\s]/gi;
+const regexNonAlphaNumeric = /[|()[\]/\\\-+_.,\s]/gi;
 const regexNotNumeric = /[|()[\]/\\\-+_\sa-zA-Z]/gi;
 const regexDateDelimiter = /[|()[\]/\\\-+_.\sa-zA-Z]/gi;
 const regexNumeric = /[0-9]/i;
@@ -193,7 +193,9 @@ class InputMask {
   _sanitizeInput(val): string {
     const formatVal = (regexCharsToStrip: RegExp) => {
       const _val = (!val && val !== 0) ? "" : val;
-      return _val.toString().replace(regexCharsToStrip, "");
+      return _val.toString()
+        .replace(regexCharsToStrip, "")
+        .replace(this._delimiter, "");
     };
     if (this._isTypeNumber()) {
       return formatVal(regexNotNumeric);
@@ -204,13 +206,29 @@ class InputMask {
     return (val || "").toString().replace(regexNonAlphaNumeric, "");
   }
 
+  _round(num: string = "") {
+    if (num.length <= this._decimalPrecision || !this._decimalPrecision){
+      return num;
+    }
+    const rounded = ((parseInt(num, 10) || 0) / 10 ** num.length)
+      .toFixed(this._decimalPrecision);
+    if (rounded[0] === "1") return num.substring(0, this._decimalPrecision);
+    return rounded.substring(2);
+  }
+
   _maskNumber(val) {
     const _val: string = this._sanitizeInput(val);
     if (!_val.length) return "";
 
-    const [numPartWhole, numPartDecimal] = _val.split(".").slice(0, 2);
+    const isLastCharDecimal = _val[_val.length - 1] === this._decimalChar;
+    const [numPartWhole, numPartDecimal] = _val.split(this._decimalChar).slice(0, 2);
 
-    if (!numPartWhole) return "";
+    if (!numPartWhole) {
+      if (isLastCharDecimal) {
+        return this._prefix + "0" + this._decimalChar;
+      }
+      return "";
+    };
 
     let composed = "";
     let placeValue = 0;
@@ -221,7 +239,9 @@ class InputMask {
       composed = numPartWhole[i] + composed;
       placeValue++;
     }
-    const suffix = numPartDecimal ? `${this._decimalChar}${numPartDecimal}` : "";
+    const suffix = numPartDecimal
+      ? `${this._decimalChar}${this._round(numPartDecimal)}`
+      : (isLastCharDecimal ? this._decimalChar : "");
     const prefix = composed ? this._prefix : "";
     return prefix + composed + suffix;
   }
