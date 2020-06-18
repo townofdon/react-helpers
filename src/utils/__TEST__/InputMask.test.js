@@ -40,6 +40,12 @@ test('input masks work correctly for phone numbers', () => {
   expect(i7.mask('1234567')).toEqual('1 (800) 123-4567');
   const i8 = new InputMask({ mask: '\\0\\1\\2\\3 0000 0000 0000' });
   expect(i8.mask('123412341234')).toEqual('0123 1234 1234 1234');
+
+  // handle prefix
+  const i9 = new InputMask({ mask: '0000 0000 0000 0000', prefix: "visa " });
+  expect(i9.mask('1111222233334444')).toEqual('visa 1111 2222 3333 4444');
+  expect(i9.mask('1111')).toEqual('visa 1111');
+  expect(i9.mask('')).toEqual('');
 });
 
 test('input mask resolve works as expected', () => {
@@ -87,6 +93,18 @@ test('input mask works for number type', () => {
   expect(i2.mask('15000.00')).toEqual('15.000,00');
   expect(i2.mask('150000.00')).toEqual('150.000,00');
   expect(i2.mask('1500000.00')).toEqual('1.500.000,00');
+
+  // handle currency prefix
+  const i3 = new InputMask({ mask: Number, prefix: '$' });
+  expect(i3.mask('')).toEqual('');
+  expect(i3.mask('1')).toEqual('$1');
+  expect(i3.mask('11')).toEqual('$11');
+  expect(i3.mask('111')).toEqual('$111');
+  expect(i3.mask('1111')).toEqual('$1,111');
+  expect(i3.mask('11111')).toEqual('$11,111');
+  expect(i3.mask('111111')).toEqual('$111,111');
+  expect(i3.mask('1111111')).toEqual('$1,111,111');
+  expect(i3.mask('15000000.00')).toEqual('$15,000,000.00');
 });
 
 test('input mask works for date type', () => {

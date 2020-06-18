@@ -51,7 +51,9 @@ const DEFAULT_MASK = "";
 const DEFAULT_MASK_DELIMITER = "-";
 const DEFAULT_MASK_VALUE = "";
 const DEFAULT_DECIMAL_CHAR = ".";
+const DEFAULT_DECIMAL_PRECISION = Infinity;
 const DEFAULT_DATE_PATTERN = "YYYY-mm-dd";
+const DEFAULT_PREFIX = "";
 
 const padWithZeros = (str, numFill = 0) => {
   return (str || "")
@@ -68,6 +70,8 @@ interface InputMaskConstructorOptions {
   guide?: boolean;
   decimalChar?: string;
   datePattern?: string;
+  decimalPrecision?: number;
+  prefix?: string;
 }
 
 interface PatternPart {
@@ -83,7 +87,9 @@ class InputMask {
   _guide: boolean = false;
   _delimiter: string = DEFAULT_MASK_DELIMITER;
   _decimalChar: string = DEFAULT_DECIMAL_CHAR;
+  _decimalPrecision: number = DEFAULT_DECIMAL_PRECISION;
   _datePattern: string = DEFAULT_DATE_PATTERN;
+  _prefix: string = DEFAULT_PREFIX;
   value: string = DEFAULT_MASK_VALUE;
   unmaskedValue: any = DEFAULT_MASK_VALUE;
 
@@ -98,7 +104,9 @@ class InputMask {
     this._guide = options.guide || false;
     this._delimiter = options.delimiter || this._getDefaultDelimiter();
     this._decimalChar = options.decimalChar || DEFAULT_DECIMAL_CHAR;
+    this._decimalPrecision = options.decimalPrecision || DEFAULT_DECIMAL_PRECISION;
     this._datePattern = options.datePattern || DEFAULT_DATE_PATTERN;
+    this._prefix = options.prefix || DEFAULT_PREFIX;
     this._maskParts = InputMask._preparePatternParts(options.mask);
     return this;
   }
@@ -214,7 +222,8 @@ class InputMask {
       placeValue++;
     }
     const suffix = numPartDecimal ? `${this._decimalChar}${numPartDecimal}` : "";
-    return composed + suffix;
+    const prefix = composed ? this._prefix : "";
+    return prefix + composed + suffix;
   }
 
   _maskDate(val) {
@@ -365,7 +374,8 @@ class InputMask {
 
       composed += part.value;
     }
-    return composed;
+    const prefix = composed ? this._prefix : "";
+    return prefix + composed;
   }
 
   unmask(val) {
