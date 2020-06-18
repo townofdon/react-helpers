@@ -18,9 +18,11 @@
 }
 
 .App-name {
+  text-align: left;
   white-space: nowrap;
   font-weight: 300;
   font-size: 1.3em;
+  padding-right: 15px;
 }
 
 .App-header {
@@ -28,7 +30,7 @@
   display: block;
   top: 0;
   background-color: #282c34;
-  height: 100vh;
+  min-height: 100vh;
   flex-grow: 0;
   display: flex;
   flex-direction: column;
@@ -48,6 +50,10 @@
   display: inline-block;
 }
 
+.App-header nav {
+  display: block;
+  text-align: left;
+}
 .App-header nav ul {
   list-style: none;
   padding: 10px 0;
@@ -60,7 +66,9 @@
   display: inline-block;
   color: #fff;
   text-decoration: none;
-  padding: 0.5em 1em;
+  padding: 0.4em 1em;
+  font-size: 0.8em;
+  font-weight: 300;
 }
 .App-header nav ul li a.active {
   color: cyan;
@@ -81,9 +89,8 @@
 
 .App-content-body {
   padding: 30px;
-  /* height: 100%; */
-  /* width: calc(100% - 30px); */
-  /* overflow: auto; */
+  padding-top: 35px;
+  text-align: left;
 }
 
 .App-link {
