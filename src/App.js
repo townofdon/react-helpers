@@ -1,22 +1,46 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom';
+
 import './App.css';
 
-// import InputExample from './examples/InputExample';
-import InputExample2 from './examples/InputExample2';
+import Header from './components/Header';
+import routes from './routes';
 
 function App() {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        {/* <InputExample /> */}
-        <InputExample2 />
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <header className="App-header">
+          <div className="App-header-inner">
+            <Header />
+            <nav>
+              <ul>
+                {routes.map((route, index) => (
+                  <li key={index}>
+                    <NavLink activeClassName="active" exact to={route.path}>
+                      {route.name}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        </header>
+        <div className="App-main">
+          <div className="App-content-body">
+            {routes.map((route, index) => route.component ? (
+              <Route key={index} path={route.path} exact component={route.component} />
+            ) : null)}
+          </div>
+          <footer className="App-footer">
+            <p>
+              (c) Airship LLC
+            </p>
+          </footer>
+        </div>
+      </div>
+    </Router>
   );
 }
 

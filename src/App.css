@@ -1,10 +1,14 @@
 .App {
+  min-height: 100vh;
   text-align: center;
+  display: flex;
+  align-items: stretch;
 }
 
 .App-logo {
-  height: 40vmin;
+  height: 10vmin;
   pointer-events: none;
+  display: inline-block;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -13,19 +17,88 @@
   }
 }
 
+.App-name {
+  white-space: nowrap;
+  font-weight: 300;
+  font-size: 1.3em;
+}
+
 .App-header {
+  position: sticky;
+  display: block;
+  top: 0;
   background-color: #282c34;
-  min-height: 100vh;
+  height: 100vh;
+  flex-grow: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+.App-header-inner {
+  padding: 30px;
+}
+.App-header .header-top {
+  display: flex;
+  align-items: center;
+}
+.App-header .header-top p {
+  display: inline-block;
+}
+
+.App-header nav ul {
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+}
+.App-header nav ul li {
+  display: block;
+}
+.App-header nav ul li a {
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5em 1em;
+}
+.App-header nav ul li a.active {
+  color: cyan;
+}
+.App-header nav ul li a:hover,
+.App-header nav ul li a:active,
+.App-header nav ul li a:focus {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.App-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  /* overflow: hidden; */
+}
+
+.App-content-body {
+  padding: 30px;
+  /* height: 100%; */
+  /* width: calc(100% - 30px); */
+  /* overflow: auto; */
 }
 
 .App-link {
   color: #61dafb;
+}
+
+.App-footer {
+  padding: 15px;
+  background: slategray;
+  background: #32353d;
+  color: #eee
+}
+.App-footer p {
+  margin: 0;
+  font-size: 0.8em;
 }
 
 @keyframes App-logo-spin {
