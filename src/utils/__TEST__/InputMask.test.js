@@ -15,6 +15,7 @@ test('input masks work correctly for phone numbers', () => {
   // handle extra chars
   const i4 = new InputMask({ mask: '[1 ](000)-000-0000' });
   expect(i4.mask('(777) 555-3333')).toEqual('(777)-555-3333');
+  expect(i4.mask('(777)-555-3333')).toEqual('(777)-555-3333');
   expect(i4.mask('777 555-3333')).toEqual('(777)-555-3333');
 
   // handle partials
@@ -33,6 +34,12 @@ test('input masks work correctly for phone numbers', () => {
   expect(i6.mask('777555601')).toEqual('(777) 555-601_');
   expect(i6.mask('7775556010')).toEqual('(777) 555-6010');
   expect(i6.mask('')).toEqual('(___) ___-____');
+
+  // handle escaped characters
+  const i7 = new InputMask({ mask: '1 (8\\0\\0) 000-0000' });
+  expect(i7.mask('1234567')).toEqual('1 (800) 123-4567');
+  const i8 = new InputMask({ mask: '\\0\\1\\2\\3 0000 0000 0000' });
+  expect(i8.mask('123412341234')).toEqual('0123 1234 1234 1234');
 });
 
 test('input mask resolve works as expected', () => {

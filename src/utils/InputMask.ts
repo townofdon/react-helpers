@@ -46,6 +46,7 @@ const regexAlpha = /[a-zA-Z]/i;
 const CHAR_DIGIT = "0";
 const CHAR_ALPHA = "a";
 const CHAR_ANY = "*";
+const CHAR_ESCAPE = "\\";
 const DEFAULT_MASK = "";
 const DEFAULT_MASK_DELIMITER = "-";
 const DEFAULT_MASK_VALUE = "";
@@ -71,7 +72,8 @@ interface InputMaskConstructorOptions {
 
 interface PatternPart {
   value: string;
-  optional: true;
+  optional: boolean;
+  escape: boolean;
 }
 
 class InputMask {
@@ -116,20 +118,31 @@ class InputMask {
     let parts: PatternPart[] = [];
     let buffer = "";
     let optionalFlag = false;
-    const addPart = (value, optional) => {
+    let escapeNextChar = false;
+    const addPart = (value, optional = false, escape = false) => {
       parts.push({
         value,
         optional,
+        escape,
       });
     };
     for (let i = 0; i < _mask.length; i += 1) {
       const char = _mask[i];
+      if (escapeNextChar) {
+        addPart(char, false, true);
+        escapeNextChar = false;
+        continue;
+      }
+      if (char === CHAR_ESCAPE) {
+        escapeNextChar = true;
+        continue;
+      }
       if (char === "[") {
         optionalFlag = true;
         continue;
       }
       if (char === "]") {
-        addPart(buffer, true);
+        addPart(buffer, true, false);
         optionalFlag = false;
         buffer = "";
         continue;
@@ -138,7 +151,7 @@ class InputMask {
         buffer += char;
         continue;
       }
-      addPart(char, false);
+      addPart(char, false, false);
     }
     return parts;
   }
@@ -316,6 +329,11 @@ class InputMask {
         .trim()
         .toLowerCase()
         .replace(regexNonAlphaNumeric, "");
+
+      if (part.escape) {
+        composed += part.value;
+        continue;
+      }
 
       if (cursor >= maxCursor) {
         if (!this._guide) break;
