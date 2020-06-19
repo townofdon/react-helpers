@@ -90,6 +90,17 @@ test('input mask works for number type', () => {
   expect(i1.mask('15000.00')).toEqual('15,000.00');
   expect(i1.mask('15000000.00')).toEqual('15,000,000.00');
 
+  // handle user input
+  const iu = new InputMask({ mask: Number });
+  expect(iu.mask('1,1')).toEqual('11');
+  expect(iu.mask('11,11')).toEqual('1,111');
+  expect(iu.mask('111,11')).toEqual('11,111');
+  expect(iu.mask('111,111')).toEqual('111,111');
+  expect(iu.mask('1111,111')).toEqual('1,111,111');
+  expect(iu.mask('1111,1111')).toEqual('11,111,111');
+  expect(iu.mask('1,111,1111')).toEqual('11,111,111');
+  expect(iu.mask('1,111,11111')).toEqual('111,111,111');
+
   // handle different number formats
   const i2 = new InputMask({ mask: Number, delimiter: '.', decimalChar: ',' });
   expect(i2.mask('15000,00')).toEqual('15.000,00');
@@ -143,6 +154,14 @@ test('input mask works for number type', () => {
 
 test('input mask works for date type', () => {
   const i1 = new InputMask({ mask: Date, datePattern: 'YYYY-mm-dd', delimiter: '-' });
+  expect(i1.mask('')).toEqual('');
+  expect(i1.mask('2')).toEqual('2');
+  expect(i1.mask('20')).toEqual('20');
+  expect(i1.mask('200')).toEqual('200');
+  expect(i1.mask('2001')).toEqual('2001');
+  expect(i1.mask('20010')).toEqual('2001-0');
+  expect(i1.mask('200101')).toEqual('2001-01');
+  expect(i1.mask('2001010')).toEqual('2001-01-0');
   expect(i1.mask('20010101')).toEqual('2001-01-01');
   expect(i1.mask('20010131')).toEqual('2001-01-31');
   expect(i1.mask('20011231')).toEqual('2001-12-31');
@@ -173,4 +192,17 @@ test('input mask works for date type', () => {
   expect(i4.mask('02292010')).toEqual('03/01/2010');
   expect(i4.mask('02302010')).toEqual('03/02/2010');
   expect(i4.mask('02312010')).toEqual('03/03/2010');
+
+  // handle date guide mode
+  const i5 = new InputMask({ mask: Date, guide: true });
+  expect(i5.mask('')).toEqual('____/__/__');
+  expect(i5.mask('2')).toEqual('2___/__/__');
+  expect(i5.mask('20')).toEqual('20__/__/__');
+  expect(i5.mask('200')).toEqual('200_/__/__');
+  expect(i5.mask('2000')).toEqual('2000/__/__');
+  expect(i5.mask('20001')).toEqual('2000/1_/__');
+  expect(i5.mask('200011')).toEqual('2000/11/__');
+  expect(i5.mask('2000111')).toEqual('2000/11/1_');
+  expect(i5.mask('20001111')).toEqual('2000/11/11');
+  expect(i5.mask('20200101')).toEqual('2020/01/01');
 });

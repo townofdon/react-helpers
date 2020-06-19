@@ -86,6 +86,7 @@ class InputMask {
   _maxLength: number = Infinity;
   _guide: boolean = false;
   _delimiter: string = DEFAULT_MASK_DELIMITER;
+  _delimiterRegex: RegExp;
   _decimalChar: string = DEFAULT_DECIMAL_CHAR;
   _decimalPrecision: number = DEFAULT_DECIMAL_PRECISION;
   _datePattern: string = DEFAULT_DATE_PATTERN;
@@ -103,6 +104,7 @@ class InputMask {
     this._maxLength = options.maxLength || Infinity;
     this._guide = options.guide || false;
     this._delimiter = options.delimiter || this._getDefaultDelimiter();
+    this._delimiterRegex = new RegExp(`\\${this._delimiter}`, "g");
     this._decimalChar = options.decimalChar || DEFAULT_DECIMAL_CHAR;
     this._decimalPrecision = options.decimalPrecision || DEFAULT_DECIMAL_PRECISION;
     this._datePattern = options.datePattern || DEFAULT_DATE_PATTERN;
@@ -195,7 +197,7 @@ class InputMask {
       const _val = (!val && val !== 0) ? "" : val;
       return _val.toString()
         .replace(regexCharsToStrip, "")
-        .replace(this._delimiter, "");
+        .replace(this._delimiterRegex, "");
     };
     if (this._isTypeNumber()) {
       return formatVal(regexNotNumeric);
@@ -252,7 +254,7 @@ class InputMask {
       .split(regexNonAlphaNumeric)
       .filter(v => !!v)
       .map(v => v.toLowerCase());
-
+    const maxCursor = _val.length;
     let composed = "";
     let cursor = 0;
     let currentDay: number = 0;
@@ -290,6 +292,8 @@ class InputMask {
           partial = max;
         }
         setTimeFromInput(currentTimeUnit, partial);
+      } else if (this._guide) {
+        partial = partial.padEnd(numChars, "_");
       }
       composed += partial
       cursor += partial.length;
@@ -297,6 +301,20 @@ class InputMask {
 
     for (let i = 0; i < datePatternParts.length; i++) {
       const part = datePatternParts[i];
+      if (cursor >= maxCursor) {
+        if (!this._guide) break;
+        if (cursor !== 0) {
+          composed += this._delimiter;
+        }
+        if (part.includes('y')) {
+          composed += "____";
+          cursor += 4;
+        } else {
+          composed += "__";
+          cursor += 2;
+        }
+        continue;
+      }
       if (part.includes('y')) {
         captureChars('y', 4, '9999');
         continue;
