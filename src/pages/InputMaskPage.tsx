@@ -50,8 +50,7 @@ const Input: React.FC<InputProps> = ({ label, inputMask, placeholder, ...props }
         {...field}
         ref={inputRef}
         onChange={onChange}
-        // TODO: add placeholder
-        // placeholder={inputMask && inputMask.getPlaceholder() || placeholder}
+        placeholder={(inputMask && inputMask.placeholder) || placeholder}
         style={{ marginBottom: 10 }}
       />
       {meta.touched && meta.error ? (
@@ -64,7 +63,7 @@ const Input: React.FC<InputProps> = ({ label, inputMask, placeholder, ...props }
 const inputMaskPhone = new InputMask({ mask: '[1 ](000) 000-0000' });
 const inputMaskCreditCard = new InputMask({ mask: '0000 0000 0000 0000' });
 const inputMaskNumber = new InputMask({ mask: Number });
-const inputMaskDate = new InputMask({ mask: Date });
+const inputMaskDate = new InputMask({ mask: Date, datePattern: "mm dd yyyy", delimiter: "-" });
 
 const InputMaskPage = () => {
   const onSubmit = (values) => {

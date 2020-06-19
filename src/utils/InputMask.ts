@@ -53,7 +53,9 @@ const DEFAULT_MASK_VALUE = "";
 const DEFAULT_DECIMAL_CHAR = ".";
 const DEFAULT_DECIMAL_PRECISION = Infinity;
 const DEFAULT_DATE_PATTERN = "YYYY-mm-dd";
+const DEFAULT_DATE_PATTERN_PARTS = ["yyyy", "mm", "dd"];
 const DEFAULT_PREFIX = "";
+const DEFAULT_PLACEHOLDER = "";
 
 const padWithZeros = (str, numFill = 0) => {
   return (str || "")
@@ -90,7 +92,9 @@ class InputMask {
   _decimalChar: string = DEFAULT_DECIMAL_CHAR;
   _decimalPrecision: number = DEFAULT_DECIMAL_PRECISION;
   _datePattern: string = DEFAULT_DATE_PATTERN;
+  _datePatternParts: string[] = DEFAULT_DATE_PATTERN_PARTS;
   _prefix: string = DEFAULT_PREFIX;
+  placeholder: string = DEFAULT_PLACEHOLDER;
   value: string = DEFAULT_MASK_VALUE;
   unmaskedValue: any = DEFAULT_MASK_VALUE;
 
@@ -110,6 +114,8 @@ class InputMask {
     this._datePattern = options.datePattern || DEFAULT_DATE_PATTERN;
     this._prefix = options.prefix || DEFAULT_PREFIX;
     this._maskParts = InputMask._preparePatternParts(options.mask);
+    this._datePatternParts = InputMask._prepareDatePatternParts(this._datePattern);
+    this.placeholder = this._getMaskPlaceholder();
     return this;
   }
 
@@ -164,6 +170,28 @@ class InputMask {
       addPart(char, false, false);
     }
     return parts;
+  }
+
+  static _prepareDatePatternParts(datePattern: string = ""): string[] {
+    return datePattern
+      .split(regexNonAlphaNumeric)
+      .filter(v => !!v)
+      .map(v => v.toLowerCase());
+  }
+
+  _getMaskPlaceholder() {
+    let dummyInput = "".padStart(this._mask.length, "9");
+    if (this._isTypeNumber()) {
+      dummyInput = "9999.99";
+    } else if (this._isTypeDate()) {
+      return this._datePatternParts.map(part => {
+        if (part.includes("y")) return "YYYY";
+        if (part.includes("m")) return "MM";
+        if (part.includes("d")) return "DD";
+        return "";
+      }).join(this._delimiter);
+    }
+    return this.mask(dummyInput) || DEFAULT_PLACEHOLDER;
   }
 
   _isTypeNumber() {
@@ -250,10 +278,7 @@ class InputMask {
 
   _maskDate(val) {
     const _val: string = this._sanitizeInput(val);
-    const datePatternParts = this._datePattern
-      .split(regexNonAlphaNumeric)
-      .filter(v => !!v)
-      .map(v => v.toLowerCase());
+    const datePatternParts = this._datePatternParts;
     const maxCursor = _val.length;
     let composed = "";
     let cursor = 0;
