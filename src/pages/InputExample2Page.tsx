@@ -43,7 +43,7 @@ configInputBase.setContainerComponent(({ children }) => {
   );
 })
 
-const InputExample2 = () => {
+const InputExample2Page = () => {
   return (
     <div>
       <h2>Modified Input Components:</h2>
@@ -54,4 +54,4 @@ const InputExample2 = () => {
   );
 };
 
-export default InputExample2;
+export default InputExample2Page;

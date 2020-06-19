@@ -43,7 +43,7 @@ const Input = InputBaseFactory(({ name, label, error }) => {
 });
 
 
-const InputExample = () => {
+const InputExamplePage = () => {
   return (
     <div>
       <h2>Vanilla Input Components:</h2>
@@ -59,4 +59,4 @@ const InputExample = () => {
   );
 };
 
-export default InputExample;
+export default InputExamplePage;

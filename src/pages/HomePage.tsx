@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-const Home = () => {
+const HomePage = () => {
   return (
     <>
       <h2>React Helpers - Home</h2>
@@ -17,4 +17,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

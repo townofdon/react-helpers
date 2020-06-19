@@ -1,22 +1,28 @@
 
-import Home from './pages/Home';
-import InputExample from './pages/InputExample';
-import InputExample2 from './pages/InputExample2';
+import HomePage from './pages/HomePage';
+import InputExamplePage from './pages/InputExamplePage';
+import InputExample2Page from './pages/InputExample2Page';
+import InputMaskPage from './pages/InputMaskPage';
 
 export default [
   {
     path: '/',
     name: 'Home',
-    component: Home,
+    component: HomePage,
   },
   {
-    path: '/example-1',
+    path: '/input-example-1',
     name: 'Input Example 1',
-    component: InputExample,
+    component: InputExamplePage,
   },
   {
-    path: '/example-2',
+    path: '/input-example-2',
     name: 'Input Example 2',
-    component: InputExample2,
+    component: InputExample2Page,
+  },
+  {
+    path: '/input-mask',
+    name: 'Input Mask',
+    component: InputMaskPage,
   },
 ];
