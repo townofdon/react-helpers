@@ -4,6 +4,7 @@ import Form from '../components/form/Form';
 import { useField } from 'formik';
 import InputMask from '../utils/InputMask';
 
+// NOTE - normally, <Input> component would be defined in a separate file.
 interface InputProps {
   label?: string,
   name: string,
